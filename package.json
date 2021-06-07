@@ -4,7 +4,8 @@
   "description": "Rest para sadeInfra",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon index.js"
+    "start:dev": "nodemon index.js",
+    "start":"node index.js"
   },
   "repository": {
     "type": "git",
