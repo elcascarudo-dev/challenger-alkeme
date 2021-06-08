@@ -1,7 +1,7 @@
 {
-  "name": "rest-sade-infra-v2",
+  "name": "rest-login",
   "version": "1.0.0",
-  "description": "Rest para sadeInfra",
+  "description": "rest - Login completo",
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon index.js",
@@ -9,16 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://elcascarudo@bitbucket.org/elcascarudo/sade-infra-rest.git"
+    "url": "git+https://elcascarudo@bitbucket.org/elcascarudo/rest-login.git"
   },
   "author": "elcascarudo.dev@gmail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitbucket.org/elcascarudo/sade-infra-rest/issues"
+    "url": "https://bitbucket.org/elcascarudo/rest-login/issues"
   },
-  "homepage": "https://bitbucket.org/elcascarudo/sade-infra-rest#readme",
+  "homepage": "https://bitbucket.org/elcascarudo/rest-login#readme",
   "dependencies": {
-    "@sendgrid/mail": "^7.4.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
@@ -30,7 +29,6 @@
     "mongoose": "^5.12.2",
     "nodemailer": "^6.6.1",
     "serve-index": "^1.9.1",
-    "swagger-ui-express": "^4.1.6",
     "uuid": "^8.3.2"
   }
 }
