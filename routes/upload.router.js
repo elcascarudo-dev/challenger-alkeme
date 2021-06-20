@@ -25,8 +25,8 @@
  * 
  */
  const  { 
-          subirFoto, 
-          verFotos 
+          uploadPhoto, 
+          viewPhoto 
         } = require( '../controllers/upload.controller' );
  
 
@@ -41,9 +41,76 @@
  * Rutas
  * 
  */
- router.put( '/foto/:tipo/:id', validarJWT, subirFoto );
- router.get( '/foto/:tipo/:imagen', verFotos );
- 
+ router.put( '/foto/:type/:id', validarJWT, uploadPhoto );
+/**
+ * @swagger
+ * /api/upload/foto/{type}/{id}:
+ *   put:
+ *      description: Listar detalles Pelicula
+ *      tags:
+ *          - upload
+ *      parameters:
+ *          - in: path
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: Tipos( profile, movie (para series o peliculas), genre, character )
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: ID pelicula
+ *          - in: query
+ *            name: token
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: Token generado del login
+ *          - in: formData
+ *            name: imagen
+ *            type: file
+ *            description: Imagen a subir.
+ *      responses:
+ *          '200':
+ *              description: Resource added successfully
+ *          '500':
+ *              description: Internal server error
+ *          '400':
+ *              description: Bad request
+ */
+
+ router.get( '/foto/:type/:image', viewPhoto );
+ /**
+ * @swagger
+ * /api/upload/foto/{type}/{image}:
+ *   get:
+ *      description: Listar detalles Pelicula
+ *      tags:
+ *          - upload
+ *      parameters:
+ *          - in: path
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: Tipos( profile, movie (para series o peliculas), genre, character )
+ *          - in: path
+ *            name: image
+ *            required: true
+ *            schema:
+ *              type: string
+ *            description: Imagen a mostrar
+ *      responses:
+ *          '200':
+ *              description: Resource added successfully
+ *          '500':
+ *              description: Internal server error
+ *          '400':
+ *              description: Bad request
+ */
+
 /*****************************************************************************
  * 
  * Exportar rutas

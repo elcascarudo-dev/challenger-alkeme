@@ -11,7 +11,7 @@ const { response } = require('express');
  * Importación modelos
  * 
  */
-const Usuario = require( '../models/users.model' );
+const User = require( '../models/users.model' );
 
 
 /*****************************************************************************
@@ -24,12 +24,9 @@ const global = async ( req, res ) => {
   const buscar = new RegExp( req.params.buscar, 'i' );
   // const regex = new RegExp( buscar, 'i' );
   
-
   const [ usuarios ] = await Promise.all([
-    Usuario.find({ nombre: buscar }),
-  ])
-
-
+    User.find({ nombre: buscar }),
+  ]);
 
   res.json({
     ok: true,
@@ -42,7 +39,7 @@ const usuarios = async ( req, res ) => {
 
   const buscar = new RegExp( req.params.buscar, 'i' );
 
-  const usuarios = await Usuario.find( { nombre: buscar } );
+  const usuarios = await User.find( { nombre: buscar } );
 
   res.json({
     ok: true,

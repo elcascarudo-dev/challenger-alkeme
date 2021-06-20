@@ -1,6 +1,17 @@
+/*****************************************************************************
+ * 
+ * Importación de librerias
+ * 
+ */
 const { response} = require( 'express' );
 const { validationResult } = require( 'express-validator' );
 
+
+/*****************************************************************************
+ * 
+ * Valido si hay errores en los campo mediante express-validator
+ * 
+ */
 const validarCampos = ( req, res = response, next ) => {
 
   // Valido si hay errores los envio como respuesta

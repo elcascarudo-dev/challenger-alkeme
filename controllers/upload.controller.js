@@ -7,27 +7,42 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const logger = require('log4js').getLogger('upload');
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 
 /*****************************************************************************
  * 
  * Modelo
  * 
  */
-const Usuario = require( '../models/users.model' );
+const Usuario   = require( '../models/users.model' );
+const Movie     = require( '../models/movie.model' );
+const Genre     = require( '../models/genre.model' );
+const Character = require( '../models/character.model' );
 
 /*****************************************************************************
  * 
  * Cargar imagenes
  * 
- * El parametro "tipo" es obligatorio y debe:
- * -> ticket
- * -> perfil
+ * El parametro "tipo" es obligatorio y debe ser:
+ * -> images
+ * -> profile
  * 
  */
-const subirFoto = async ( req, res ) => {
+const uploadPhoto = async ( req, res ) => {
 
-  const uid  = req.params.id;
-  const tipo = req.params.tipo;
+  const _id  = req.params.id;
+  const tipo = req.params.type;
+
+
+  logger.debug( `Id Ingresado ${ _id } para actualizar` );
+
+  if( !mongoose.Types.ObjectId.isValid( _id ) ){
+    logger.warn( `El ID ${ _id } no tiene un formato valido` );
+    return res.json({
+      ok: false,
+      msg: `El ID ${ _id } no tiene un formato valido`
+    });
+  }
 
   // Valido si se envio algun archivo
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -38,7 +53,7 @@ const subirFoto = async ( req, res ) => {
   }
 
   // Valido que el tipo sea el permitido
-  const tipoPermitido = [ 'perfil', 'ticket' ];
+  const tipoPermitido = [ 'profile', 'movie', 'genre', 'movie', 'character' ];
   
   if ( !tipoPermitido.includes( tipo ) ) {
     return res.status(400).json({
@@ -61,7 +76,8 @@ const subirFoto = async ( req, res ) => {
       msh: 'No es una extención permitida'
     });
   }
-  //Nombre de archivo unico
+
+  //Genero un nombre de archivo unico
   const nombreArchivo = `${ uuidv4() }.${ extencionArchio }`;
   // Path para guardar imagen
   const path = `./uploads/${ tipo }/${ nombreArchivo }`;
@@ -83,20 +99,20 @@ const subirFoto = async ( req, res ) => {
 
   switch ( tipo ) {
     //---------------------------------------------------------
-    // Actualizar imagen perfil
-    case 'perfil':
+    // Actualizar imagen profile
+    case 'profile':
         try {
       
-          const usuarioDB = await Usuario.findById( {_id: uid} );
+          const usuarioDB = await Usuario.findById( {_id: _id} );
       
-          if( fs.existsSync( `./uploads/perfil/${ usuarioDB.img }` ) ){
+          if( fs.existsSync( `./uploads/profile/${ usuarioDB.img }` ) ){
             // Borro la imagen del path
-            fs.unlinkSync( `./uploads/perfil/${ usuarioDB.img }` );
+            fs.unlinkSync( `./uploads/profile/${ usuarioDB.img }` );
           }
           // Agrego la nueva imagen
           usuarioDB.img = nombreArchivo;
           // Actualizo la BBDD
-          const usrActualizado = await usuarioDB.save(); //Usuario.findByIdAndUpdate( {_id: uid}, usuarioDB, { new: true } );
+          const usrActualizado = await usuarioDB.save(); //Usuario.findByIdAndUpdate( {_id: _id}, usuarioDB, { new: true } );
       
           res.json({
             ok: true,
@@ -105,6 +121,12 @@ const subirFoto = async ( req, res ) => {
       
         } catch (error) {
           logger.error( error );
+
+          /************************************************************************
+           *  Si se genero error al realizar el UpDate se elimina la imagen subida
+           ************************************************************************/
+          fs.unlinkSync( path );
+
       
           return res.status(500).json({
             ok: false,
@@ -113,8 +135,114 @@ const subirFoto = async ( req, res ) => {
         }
       break;
   
-    default:
+    //---------------------------------------------------------
+    // Actualizar personaje
+    case 'character':
+        try {
+      
+          const characterDB = await Character.findById( {_id: _id} );
+      
+          if( fs.existsSync( `./uploads/character/${ characterDB.img }` ) ){
+            // Borro la imagen del path
+            fs.unlinkSync( `./uploads/character/${ characterDB.img }` );
+          }
+          // Agrego la nueva imagen
+          characterDB.img = nombreArchivo;
+          // Actualizo la BBDD
+          const characterUp = await characterDB.save(); 
+      
+          res.json({
+            ok: true,
+            character: characterUp
+          });
+      
+        } catch (error) {
+          logger.error( error );
+
+          /************************************************************************
+           *  Si se genero error al realizar el UpDate se elimina la imagen subida
+           ************************************************************************/
+          fs.unlinkSync( path );
+      
+          return res.status(500).json({
+            ok: false,
+            msh: 'Ocurrio un error'
+          });
+        }
       break;
+  
+    //---------------------------------------------------------
+    // Actualizar movimientos
+    case 'movie':
+        try {
+      
+          const movieDB = await Movie.findById( {_id: _id} );
+      
+          if( fs.existsSync( `./uploads/movie/${ movieDB.img }` ) ){
+            // Borro la imagen del path
+            fs.unlinkSync( `./uploads/movie/${ movieDB.img }` );
+          }
+          // Agrego la nueva imagen
+          movieDB.img = nombreArchivo;
+          // Actualizo la BBDD
+          const movieUp = await movieDB.save(); 
+      
+          res.json({
+            ok: true,
+            movie: movieUp
+          });
+      
+        } catch (error) {
+          logger.error( error );
+
+          /************************************************************************
+           *  Si se genero error al realizar el UpDate se elimina la imagen subida
+           ************************************************************************/
+          fs.unlinkSync( path );
+      
+          return res.status(500).json({
+            ok: false,
+            msh: 'Ocurrio un error'
+          });
+        }
+      break;
+
+    //---------------------------------------------------------
+    // Actualizar personaje
+    case 'genre':
+        try {
+      
+          const genreDB = await Genre.findById( {_id: _id} );
+      
+          if( fs.existsSync( `./uploads/genre/${ genreDB.img }` ) ){
+            // Borro la imagen del path
+            fs.unlinkSync( `./uploads/genre/${ genreDB.img }` );
+          }
+          // Agrego la nueva imagen
+          genreDB.img = nombreArchivo;
+          // Actualizo la BBDD
+          const genreUp = await genreDB.save(); 
+      
+          res.json({
+            ok: true,
+            genre: genreUp
+          });
+      
+        } catch (error) {
+          logger.error( error );
+
+          /************************************************************************
+           *  Si se genero error al realizar el UpDate se elimina la imagen subida
+           ************************************************************************/
+          fs.unlinkSync( path );
+      
+          return res.status(500).json({
+            ok: false,
+            msh: 'Ocurrio un error'
+          });
+        }
+      break;
+
   }
 
 }
@@ -127,10 +255,10 @@ const subirFoto = async ( req, res ) => {
  * 
  */
 
-const verFotos = async ( req, res ) => {
+const viewPhoto = async ( req, res ) => {
 
-  const imagen = req.params.imagen;
-  const tipo   = req.params.tipo;
+  const imagen = req.params.image;
+  const tipo   = req.params.type;
 
   // Busco la imagen que mando por los parametros
   const pathFoto = path.join( __dirname, `../uploads/${ tipo }/${ imagen }` );
@@ -149,6 +277,6 @@ const verFotos = async ( req, res ) => {
 
 
 module.exports = {
-  subirFoto,
-  verFotos
+  uploadPhoto,
+  viewPhoto
 }

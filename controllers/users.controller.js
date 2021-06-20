@@ -12,7 +12,7 @@ const bcrypt = require( 'bcryptjs' );
  * Importación de modelos
  * 
  */
-const Usuario = require( '../models/users.model' );
+const User = require( '../models/users.model' );
 
 /*****************************************************************************
  * 
@@ -20,7 +20,14 @@ const Usuario = require( '../models/users.model' );
  * 
  */
 const { generarJWT } = require( '../helpers/jwt.helper' );
+const { enviarEmail } = require( '../helpers/sendGrid.helper' ); 
 
+/*****************************************************************************
+ * 
+ * Importación de Templates
+ * 
+ */
+const { templateWelcome } = require( '../templates/email.template' );
 
 /*****************************************************************************
  * 
@@ -32,22 +39,32 @@ const listar = async ( req, res ) => {
 
   const desde = Number( req.query.desde ) || 0;
 
-  const [ usuarios, total ] = await Promise.all([
-
-    Usuario
-            .find( {}, 'nombre mail role img email estado' )
-            .skip( desde )
-            .limit( 5 ),
-
-    Usuario.countDocuments()
+  try {
+    
+    const [ usuarios, total ] = await Promise.all([
+      
+      User
+      .find( {}, 'nombre mail role img email estado' )
+      .skip( desde )
+      .limit( 5 ),
+      
+      User.countDocuments()
   
-  ]);
+    ]);
+    
+    res.json({
+      ok: true,
+      total,
+      usuarios
+    });
+  } catch (error) {
 
-  res.json({
-    ok: true,
-    usuarios,
-    total
-  });
+    logger.error( error );    
+    res.status( 500 ).json({
+      ok: false,
+      msg: 'Error desconocido comuniquese con el administradro'
+    });
+  }
 
 }
 
@@ -66,20 +83,21 @@ const crear = async ( req, res ) => {
 
   try {
     // Validamos que el mail no exista en la BBDD
-    const existeEmail = await Usuario.findOne( {email} );
+    const existeEmail = await User.findOne( {email} );
     // Si existe  devuelvo mensaje 
     if ( existeEmail ) {
       
-      logger.error( `El email: ${ email }, ya existe en la BBDD` );
-
+      logger.debug( `El email: ${ email }, ya existe en la BBDD` );
       return res.status( 400 ).json({
         ok: false,
         msg: 'El usuario ya existe'
       });
 
+      
     }
 
-    const usuario = new Usuario( req.body );
+
+    const usuario = new User( req.body );
 
     //encriptar contraseña
     const salt = bcrypt.genSaltSync();
@@ -89,7 +107,12 @@ const crear = async ( req, res ) => {
     await usuario.save();
 
     // Generar Token JWT
-    const token = await generarJWT( usuario.id );
+    const token = await generarJWT( User.id );
+
+    //Envio el mail de Bienvenida
+    const msg = templateWelcome( email, password );
+    await enviarEmail( email, msg );
+
 
     // Devuelvo la respuesta
     res.json({
@@ -99,7 +122,12 @@ const crear = async ( req, res ) => {
     });
     
   } catch (error) {
-    error500( 'crear', error );
+    logger.error( `usuario 102 - ${ error }` );
+
+    res.status( 500 ).json({
+      ok: false,
+      msg: 'Error desconocido, contacte al administrador'
+    });
   }
 
 
@@ -116,7 +144,7 @@ const actualizar = async ( req, res = response ) => {
 
   try {
 
-    const usuarioDB = await Usuario.findById( uid );
+    const usuarioDB = await User.findById( uid );
 
     if( !usuarioDB ){
       return res.status( 404 ).json({
@@ -134,7 +162,7 @@ const actualizar = async ( req, res = response ) => {
 
       // Valido que el mail no exista si es que lo quiero cambiar por otro
       // Validamos que el mail no exista en la BBDD
-      const existeEmail = await Usuario.findOne( {email: req.body.email} );
+      const existeEmail = await User.findOne( {email: req.body.email} );
       // Si existe  devuelvo mensaje 
       if ( existeEmail ) {
         
@@ -151,10 +179,9 @@ const actualizar = async ( req, res = response ) => {
 
     // Elimino campos que no quiero actualizar
     delete campos.password;
-    delete campos.google;
 
     // Actualizo el usuario
-    const usuarioActualizado = await Usuario.findByIdAndUpdate( uid, campos, { new: true } );
+    const usuarioActualizado = await User.findByIdAndUpdate( uid, campos, { new: true } );
     
     res.json({
       ok: true,
@@ -185,7 +212,7 @@ const habilitar = async ( req, res = response ) => {
   
   try {
     
-    const usuarioDB = await Usuario.findById( uid );
+    const usuarioDB = await User.findById( uid );
   
     if( !usuarioDB ){
       return res.status( 404 ).json({
@@ -230,7 +257,7 @@ const habilitar = async ( req, res = response ) => {
   
   try {
     
-    const usuarioDB = await Usuario.findById( uid );
+    const usuarioDB = await User.findById( uid );
   
     if( !usuarioDB ){
       return res.status( 404 ).json({
@@ -240,7 +267,7 @@ const habilitar = async ( req, res = response ) => {
     }
 
 
-    await Usuario.findByIdAndDelete( uid );
+    await User.findByIdAndDelete( uid );
     
     res.json({
       ok: true,

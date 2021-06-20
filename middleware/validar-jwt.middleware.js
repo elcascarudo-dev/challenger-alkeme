@@ -1,11 +1,21 @@
-const logger = require('log4js').getLogger('bbdd');
+/*****************************************************************************
+ * 
+ * Importación de librerias
+ * 
+ */
+const logger = require('log4js').getLogger('validaJWT');
 const jwt = require( 'jsonwebtoken' );
 
+/*****************************************************************************
+ * 
+ * Valido si el token es valido
+ * 
+ */
 const validarJWT = ( req, res, next ) => {
 
   // Leere el token
   const token = req.query.token;
-
+  
   if ( !token ) {
 
     logger.error( 'No se envio el token en la peticion' );
@@ -24,10 +34,10 @@ const validarJWT = ( req, res, next ) => {
     next();
 
   } catch (error) {
-
+    logger.error( `Token invalido - ${ error }` );
     return res.status( 401 ).json({
       ok: false,
-      msg: 'Token no válido'
+      msg: 'El Token no es válido'
     });
 
   }

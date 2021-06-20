@@ -1,34 +1,38 @@
 {
   "name": "rest-login",
   "version": "1.0.0",
-  "description": "rest - Login completo",
+  "description": "Challenger Alkeme - Node,JS",
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon index.js",
-    "start":"node index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://elcascarudo@bitbucket.org/elcascarudo/rest-login.git"
+    "url": "git+https://github.com/elcascarudo-dev/challenger-alkeme.git"
   },
   "author": "elcascarudo.dev@gmail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitbucket.org/elcascarudo/rest-login/issues"
+    "url": "https://github.com/elcascarudo-dev/challenger-alkeme/issues"
   },
-  "homepage": "https://bitbucket.org/elcascarudo/rest-login#readme",
+  "homepage": "https://github.com/elcascarudo-dev/challenger-alkeme",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-validator": "^6.10.0",
+    "generate-password": "^1.6.0",
     "jsonwebtoken": "^8.5.1",
     "log4js": "^6.3.0",
     "mongoose": "^5.12.2",
     "nodemailer": "^6.6.1",
     "serve-index": "^1.9.1",
+    "swagger-jsdoc": "^6.1.0",
+    "swagger-ui-express": "^4.1.6",
     "uuid": "^8.3.2"
   }
 }

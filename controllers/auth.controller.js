@@ -6,20 +6,29 @@
 const logger = require('log4js').getLogger('auth');
 const { response } = require( 'express' );
 const bcrypt = require( 'bcryptjs' );
+const generator = require('generate-password');
 
 /*****************************************************************************
  * 
  * Modelos
  * 
  */
-const Usuario = require( '../models/users.model' );
+const User = require( '../models/users.model' );
 
 /*****************************************************************************
  * 
  * Helpers
  * 
  */
-const { generarJWT } = require( '../helpers/jwt.helper' );
+const { generarJWT }  = require( '../helpers/jwt.helper' );
+const { enviarEmail } = require( '../helpers/sendGrid.helper' );
+
+/*****************************************************************************
+ * 
+ * Templates
+ * 
+ */
+const { templateRestorePassword } = require( '../templates/email.template' );
 
 
 /*****************************************************************************
@@ -34,7 +43,7 @@ const login = async ( req, res = response ) => {
   try {
 
     // Verificar Email
-    const usuarioDB = await Usuario.findOne( {email} );
+    const usuarioDB = await User.findOne( {email} );
 
     if ( !usuarioDB ) {
       logger.debug( `El usuario ${email} no existe en la BBDD` );
@@ -64,7 +73,12 @@ const login = async ( req, res = response ) => {
     });
 
   } catch (error) {
-    logger.error( `Error al autenticarce: ${ error }` );
+    logger.error( `login - ${ error }` );
+
+    res.status( 500 ).json({
+      ok: false,
+      msg: 'Error desconocido, contacte al administrador'
+    });
   }
 
 }
@@ -85,7 +99,7 @@ const renewToken = async (req, res = response) => {
   const token = await generarJWT( uid );
 
   // Retornar usuario
-  const usuarioDB = await Usuario.findById( uid ); 
+  const usuarioDB = await User.findById( uid ); 
 
 
   res.json({
@@ -98,18 +112,60 @@ const renewToken = async (req, res = response) => {
 
 /*****************************************************************************
  * 
- * Contrelador para recuperar contraseña
+ * Controlador "restorePassword"
  * 
  */
 const restorePassword = async ( req, res = response ) => {
 
-  res.json({
-    ok: true,
-    msg: 'Construir la logica del controlador :P'
-  });
+  const email = req.params.email;
 
 
+  try {
+    
+    const userDB = await User.findOne( { email } );
 
+    if( !userDB ){
+      logger.debug( `El usuario ${email} no existe en la BBDD` );
+      return res.status( 404 ).json({
+        ok: false,
+        msg: `El usuario ${email} no existe en la BBDD`
+      });
+    }
+
+    // Genero una contraseña aleatoria
+    logger.debug( `Generando la nueva contraseña para ${ email }`)
+    const password = generator.generate({
+      length: 10,
+      numbers: true
+    });
+
+
+    //encriptar contraseña
+    logger.debug( `Encriptando la nueva contraseña para ${ email }` );
+    const salt = bcrypt.genSaltSync();
+    userDB.password = bcrypt.hashSync( password, salt );
+    
+    logger.debug( `Guardando la nueva contraseña para ${ email }` );
+    userDB.save();
+    
+    //Enviando email con la nueva contraseña
+    const msg = templateRestorePassword( password );
+    await enviarEmail( email, msg );
+
+    res.json({
+      ok: true,
+      msg: `Se envio la nueva contraseña a ${ email }`
+    });
+
+
+  } catch (error) {
+    logger.error( `restorePassword - ${ error }` );
+
+    res.status( 500 ).json({
+      ok: false,
+      msg: 'Error desconocido, contacte al administrador'
+    });
+  }
 }
 
 module.exports = {

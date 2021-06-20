@@ -2,6 +2,8 @@
  * 
  * Importaciones de paquetes
  * 
+ * en el texto se puede enviar HTML para el formato del cuerpo de email
+ * 
  */
 const logger = require('log4js').getLogger('enviarMail');
 const nodemailer = require('nodemailer');

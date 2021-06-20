@@ -1,15 +1,29 @@
-//Logeo de la plicacion
+/*****************************************************************************
+ * 
+ * Importación de librerias
+ * 
+ */
 const logger = require('log4js').getLogger('bbdd');
 const mongoose = require('mongoose');
 
 
-
+/*****************************************************************************
+ * 
+ * Parametros de configuración MongoDB
+ * 
+ */
 const configuraciones = {
   useNewUrlParser: true, 
   useUnifiedTopology: true,
-  useCreateIndex: true
+  useCreateIndex: true,
+  useFindAndModify: false
 };
 
+/*****************************************************************************
+ * 
+ * Conexxión a la BBDD
+ * 
+ */
 const dbConection = async() => {
 
   try {

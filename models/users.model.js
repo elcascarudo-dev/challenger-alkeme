@@ -1,6 +1,6 @@
 const { Schema, model } = require( 'mongoose' );
 
-const UsuarioSchema = Schema({
+const UserSchema = Schema({
 
   nombre: {
     type: String,
@@ -30,12 +30,13 @@ const UsuarioSchema = Schema({
 
 });
 
-UsuarioSchema.method( 'toJSON', function() {
+UserSchema.method( 'toJSON', function() {
   // Quito los campos "__v, _id, password"
   const { __v, _id, password, ...object } = this.toObject();
   // Cambio el _id por uid y lo agrego al objeto, solo a modo visual
   object.uid = _id;
   return object;
-})
+});
 
-module.exports = model( 'Usuario', UsuarioSchema );
+
+module.exports = model( 'User', UserSchema );
